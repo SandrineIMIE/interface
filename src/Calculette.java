@@ -5,41 +5,57 @@ import java.awt.GridLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener; 
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent; 
 
 public class Calculette extends JFrame{
 	private JPanel panneau;
-	private int width=400;
-	private int height=400;
+	private JPanel chiffre;
+	private JPanel calculer;
+	private JPanel resultat;
+	private int width=300;
+	private int height=300;
 	private JLabel ecran;
 	private double chiffre1;
 	private boolean cliccalcul=false;
 	private boolean miseajour=false;
 	private String calcul="";
+	private Color fondcouleur=Color.white;
+	private Color fondpanneau=fondcouleur;
+	private Color fondchiffre=fondcouleur;
+	private Color fondcalculer=fondcouleur;
 	private String[] tabchiffres= {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".","="};
 	private String[] taboperateurs= {"C","+","-","*","/","<="};
+	
 	public Calculette() {
 		this.setTitle("Calculette");
 		this.setSize(width, height);
 		this.setPreferredSize(new Dimension(width, height));
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setBackground(Color.WHITE);	
+		this.setBackground(fondcouleur);
 		
 		/**panneau principal**/
 		panneau= new JPanel ();
 		panneau.setVisible(true);
-		panneau.setBackground(Color.white);
+		panneau.setBackground(fondpanneau);
 		panneau.setLayout(new BorderLayout());
 		panneau.setSize(width, height);
 		panneau.setBorder(BorderFactory.createEmptyBorder(10, 10,10, 10));
+		/*boite de message de bienvenue*/
+		JOptionPane.showMessageDialog(this,"Welcome dans ma calculatrice");
 		
 		/**panneau écran et de résulat**/
-		JPanel 	resultat= new JPanel ();
+		resultat= new JPanel ();
 		resultat.setVisible(true);
 		resultat.setBackground(Color.DARK_GRAY);
 		resultat.setLayout(new BorderLayout());
@@ -52,16 +68,16 @@ public class Calculette extends JFrame{
 		resultat.add(ecran);
 		
 		/**panneau chiffres**/
-		JPanel chiffre = new JPanel ();
+		chiffre = new JPanel ();
 		chiffre.setVisible(true);
 		chiffre.setLayout(new GridLayout(4,3));
-		chiffre.setBackground(Color.white);
+		chiffre.setBackground(fondchiffre);
 		chiffre.setBorder(BorderFactory.createEmptyBorder(10, 0,0, 0));
 		chiffre.setPreferredSize(new Dimension(3*width/4,height-resultat.getHeight()));		
 	    
 		/*ajout des boutons*/
 	    for(int i = 0; i <tabchiffres.length; i++){
-	    	  Boutonb numero=new Boutonb(tabchiffres[i]);       
+	    	  Bouton numero=new Bouton(tabchiffres[i]);       
 
 	       		chiffre.add(numero);	
 	    	  switch (i){
@@ -77,16 +93,16 @@ public class Calculette extends JFrame{
 	    	  }
 	       }
 		/**panneau calcul**/
-		JPanel calculer= new JPanel ();
+		calculer= new JPanel ();
 		calculer.setVisible(true);
-		calculer.setBackground(Color.white);
+		calculer.setBackground(fondcalculer);
 		calculer.setLayout(new GridLayout(6,1));
 		calculer.setBorder(BorderFactory.createEmptyBorder(10, 10,0, 0));
 		calculer.setPreferredSize(new Dimension(width/4,height-resultat.getHeight()));
 		
 		/*ajout des boutons*/
 	    for(int i = 0; i <taboperateurs.length; i++){
-	    	  Boutonb operateur=new Boutonb(taboperateurs[i]);       
+	    	  Bouton operateur=new Bouton(taboperateurs[i]);       
 	       		calculer.add(operateur);	
 	         switch (i){
 	    	  	case 0:	      
@@ -119,9 +135,89 @@ public class Calculette extends JFrame{
 
 		this.setContentPane(panneau);
 		this.setVisible(true);
+
+	/**menus**/
+	JMenuBar barremenus = new JMenuBar();
+	setJMenuBar(barremenus);
+	
+	JMenu fichier = new JMenu("Fichier");
+	barremenus.add(fichier);
+	
+	JMenu taille = new JMenu("Dimensions");
+	barremenus.add(taille);	
+	
+	JMenu couleur = new JMenu("Couleur");
+	barremenus.add(couleur);
+	
+	JMenuItem quit = new JMenuItem("Quitter");
+	quit.addActionListener(new QuitListener());	
+	fichier.add(quit);
+	
+	JMenuItem taille400 = new JMenuItem("400*400");
+	taille400.setToolTipText("Redimensionne en 500*500");
+	taille400.addActionListener(new DimListener());	
+	taille.add(taille400);
+	taille.addSeparator();
+	
+	JMenuItem taille500 = new JMenuItem("500*500");
+	taille500.addActionListener(new DimListener());	
+	taille500.setToolTipText("Redimensionne en 500*500");
+	taille.add(taille500);
+	taille.addSeparator();
+	
+	JMenuItem taille600 = new JMenuItem("600*600");
+	taille600.addActionListener(new DimListener());	
+	taille600.setToolTipText("Redimensionne en 600*600");
+	taille.add(taille600);
+	
+	JMenuItem pink = new JMenuItem("rose");
+	pink.addActionListener(new FondListener());	
+	pink.setToolTipText("Change le fond en rose");
+	couleur.add(pink);
+	couleur.addSeparator();
+	JMenuItem gris = new JMenuItem("gris");
+	gris.addActionListener(new FondListener());	
+	pink.setToolTipText("Change le fond en gris");
+	couleur.add(gris);
+	couleur.addSeparator();
+	JMenuItem blanc = new JMenuItem("blanc");
+	blanc.addActionListener(new FondListener());
+	blanc.setToolTipText("Change le fond en blanc");
+	couleur.add(blanc);
+	validate();
 	}
+	/** méthodes changements **/
 
-
+	  public void Couleurchiffre (Color fond) { 
+		  fondchiffre=fond;
+		  chiffre.setBackground(fondchiffre);
+	  }
+	  
+	  public void RedimensionnerF (int a, int b) {
+			this.setSize(a, b);
+			this.setPreferredSize(new Dimension(a, b));
+			JOptionPane.showMessageDialog(this,"Vous avez redimensionné la fenêtre","Redimensions", JOptionPane.WARNING_MESSAGE);     
+	  }
+	  
+	  public void CouleurF (Color fond) {
+		  fondcouleur=fond;
+		  fondcalculer=fond;
+		  fondchiffre=fond;
+		  calculer.setBackground(fond);
+		  chiffre.setBackground(fond);
+		  panneau.setBackground(fond);
+		  
+		  validate();
+	  }
+	  
+	  public void Fondoperateur (Color fond) {
+		  fondcalculer=fond;
+		  calculer.setBackground(fondcalculer);
+	  }
+	  public void Quitter (){
+			  this.dispose();
+			  }
+	
 	/**Méthode permettant d'effectuer un calcul selon l'opération choisie**/
 	  private void Operation(){
 	    if(calcul.equals("+")){
@@ -155,7 +251,7 @@ public class Calculette extends JFrame{
 	  class ChiffreListener implements ActionListener {
 	    public void actionPerformed(ActionEvent e){
 	      //On affiche le chiffre additionnel dans le label
-	      String saisie = ((Boutonb)e.getSource()).getText();
+	      String saisie = ((Bouton)e.getSource()).getText();
 	      if(miseajour){
 	    	  miseajour = false;
 	      }
@@ -170,7 +266,7 @@ public class Calculette extends JFrame{
 	  //Listener affecté au bouton ,
 	  class VirguleListener implements ActionListener {
 	    public void actionPerformed(ActionEvent e){
-	    	 String saisie = ((Boutonb)e.getSource()).getText();
+	    	 String saisie = ((Bouton)e.getSource()).getText();
 		      if(miseajour){
 		    	  miseajour = false;
 		      }
@@ -221,6 +317,7 @@ public class Calculette extends JFrame{
 	    }
 	  }
 
+	  
 	  //Listener affecté au bouton -
 	  class MoinsListener implements ActionListener {
 	    public void actionPerformed(ActionEvent e){
@@ -281,4 +378,46 @@ public class Calculette extends JFrame{
 	      }  
 	      }
 	    }
+		//Listener affecté Fond fenetre <=
+	  class FondListener implements ActionListener {
+		    public void actionPerformed(ActionEvent e){
+		    	String couleur=((JMenuItem)e.getSource()).getText();
+		    	System.out.println(couleur);
+		    	if(couleur=="gris"){
+		    		Color fond=Color.LIGHT_GRAY;
+		    		CouleurF(fond);
+		    		}
+		    	else if(couleur=="rose"){
+		    		Color fond=Color.PINK;
+		    		CouleurF(fond); 
+		    		}
+		    	else{
+		    		Color fond=Color.white;
+		    		CouleurF(fond);
+		    		}
+		    	validate();
+		    	 }
+	  }
+		//Listener affecté dimension fenetre 
+	  class DimListener implements ActionListener {
+		    public void actionPerformed(ActionEvent e){
+		    	String dim=((JMenuItem)e.getSource()).getText();
+		    	if (dim=="400*400"){
+		    		RedimensionnerF (400,400); validate();}
+		    	else if  (dim=="500*500"){
+		    		RedimensionnerF (500,500); validate();}
+		       	else if  (dim=="600*600"){
+		    		RedimensionnerF (600,600); validate();}
+		    }
+	  }
+	//Listener affecté dimension fenetre 
+	  class QuitListener implements ActionListener {
+		    public void actionPerformed(ActionEvent e){
+		   Quitter ();
+		    }
+	  }
+	  
 }
+
+
+
